@@ -2655,11 +2655,11 @@ if st.button('テストを作成する！'):
         
         # 問題ファイル
         leap_file.add_paragraph(
-            f"Q{i+1}:　{q_text}\n{'＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿'}"
+            f"Q{i+1}:　{q_text}\n\n{'＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿'\n\n}"
         )
         # 解答ファイル
         leap_answer_file.add_paragraph(
-            f"A{i+1}:　{q_text}\n{a_text}"
+            f"A{i+1}:　{q_text}\n\n{a_text}\n\n"
         )
 
     # --- 保存処理 ---
@@ -2681,7 +2681,7 @@ if st.button('テストを作成する！'):
 if 'generated_q' in st.session_state:
     
     st.write("---")
-    st.write("👇 ここからダウンロードできます（片方押しても消えません！）")
+    st.write("👇 ここからダウンロードできます")
     
     col1, col2 = st.columns(2)
     
@@ -2701,4 +2701,5 @@ if 'generated_q' in st.session_state:
             file_name=f"LEAP_答え{suffix}.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
+
 
