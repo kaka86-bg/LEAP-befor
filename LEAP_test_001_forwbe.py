@@ -2586,6 +2586,7 @@ leap1=[('I totally agree with this opinion..','私たちはこの意見に全面
 import streamlit as st
 from docx import Document
 import io
+
 # --- 🔐 パスワード認証機能 ---
 # ここで「金庫の中のパスワード」と「入力されたパスワード」を照合します
 password = st.text_input("パスワードを入力してください", type="password")
@@ -2595,16 +2596,20 @@ if password != st.secrets["MY_PASSWORD"]:
 
 # --- 2. 画面の設定 ---
 st.title("単語・例文テスト作成アプリ 📝")
-st.write("範囲（No.）を指定してボタンを押すと、テスト問題と解答を作成します。")
+st.write("範囲を指定して、問題数を選ぶとテストを作成します。")
 
-# 入力欄
-col1, col2 = st.columns(2)
+# 入力欄（3つ並べます）
+col1, col2, col3 = st.columns(3)
+
 with col1:
-    # 最初のデータのNo.に合わせて初期値を設定
-    s = st.number_input('開始番号（No.）', min_value=1, value=1)
+    # 開始番号
+    s = st.number_input('開始番号 (No.)', min_value=1, value=1)
 with col2:
-    # データの個数を最大値に設定
-    f = st.number_input('終了番号（No.）', min_value=1, value=len(leap1))
+    # 終了番号
+    f = st.number_input('終了番号 (No.)', min_value=1, value=len(leap1))
+with col3:
+    # ★追加：出題数（デフォルト20）
+    q_num = st.number_input('出題数', min_value=1, value=20)
 
 # --- 3. 作成ボタンが押されたら実行 ---
 if st.button('テストを作成する！'):
@@ -2613,75 +2618,85 @@ if st.button('テストを作成する！'):
     if s > f:
         st.error("開始番号は終了番号より小さくしてください。")
         st.stop()
-    if f > len(leap1):
-        st.error(f"データは全部で {len(leap1)} 個しかありません。終了番号を減らしてください。")
-        st.stop()
-
-    # ドキュメントの準備
-    leap_file = Document()       # 問題用
-    leap_answer_file = Document() # 解答用
     
-    # データの抽出（スライス）
-    # リストは0番目から始まるので、開始位置は s-1 になります
-    # Pythonのスライスは終了位置を含まないので、f はそのままでOKです
-    target_data = leap1[s-1 : f] 
+    # 範囲データを抽出
+    target_data = leap1[s-1 : f]
     
     # データがない場合
     if len(target_data) < 1:
         st.error("指定された範囲のデータが見つかりません。")
         st.stop()
-        
-    # シャッフル
+
+    # ★重要：出題数の調整
+    # 指定範囲のデータ数より、要求された出題数が多い場合は、あるだけ全部出す
+    actual_q_num = min(q_num, len(target_data))
+    
+    # シャッフルして、必要な数だけ取り出す（ここがポイント！）
     random.shuffle(target_data)
+    selected_data = target_data[:actual_q_num]
     
-    # 辞書に変換（あなたのデータ形式ならこれで一発変換できます！）
-    test_dict = dict(target_data)
+    # 辞書に変換
+    test_dict = dict(selected_data)
+    questions = list(test_dict.keys())
+    answers = list(test_dict.values())
     
-    questions = list(test_dict.keys())   # 英語（左側）
-    answers = list(test_dict.values())   # 日本語（右側）
+    # --- Wordファイル作成 ---
+    leap_file = Document()
+    leap_answer_file = Document()
     
     # ヘッダー作成
-    header_text = "名前:＿＿＿＿＿＿＿＿＿＿＿＿＿＿, 範囲：No.{}～{}\n\n答えの〔No.～〕は単語番号です。\n".format(s, f)
+    header_text = f"名前:＿＿＿＿＿＿＿＿＿＿＿＿＿＿\n範囲：No.{s}～{f} からランダムに{actual_q_num}問\n\n答えの〔No.～〕は単語番号です。\n"
     leap_file.add_paragraph(header_text)
     leap_answer_file.add_paragraph(header_text)
 
-    # 問題作成ループ（指定した範囲の分だけ作る）
-    # 元のコードにあった「20問」固定ではなく、選んだ範囲の個数分作ります
     for i in range(len(questions)):
         q_text = questions[i]
         a_text = answers[i]
         
-        # 問題ファイル（英語＋下線）
+        # 問題ファイル
         leap_file.add_paragraph(
-            "Q{}:　{}\n{}".format(i + 1, q_text, '＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿')
+            f"Q{i+1}:　{q_text}\n{'＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿'}"
         )
-        # 解答ファイル（英語＋日本語答え）
+        # 解答ファイル
         leap_answer_file.add_paragraph(
-            "A{}:　{}\n{}".format(i + 1, q_text, a_text)
+            f"A{i+1}:　{q_text}\n{a_text}"
         )
 
-    # --- 保存処理（メモリ上） ---
+    # --- 保存処理 ---
     bio_q = io.BytesIO()
     leap_file.save(bio_q)
     
     bio_a = io.BytesIO()
     leap_answer_file.save(bio_a)
     
-    # --- ダウンロードボタン ---
-    st.success(f"作成完了！範囲: {s}～{f} （全{len(questions)}問）")
+    # ★重要：セッションステートに保存（これでボタンを押しても消えなくなります）
+    st.session_state['generated_q'] = bio_q.getvalue()
+    st.session_state['generated_a'] = bio_a.getvalue()
+    st.session_state['file_name_suffix'] = f"{s}～{f}"
+    
+    st.success(f"作成完了！ 範囲:No.{s}～{f} から {actual_q_num}問 作成しました。")
+
+# --- 4. ダウンロードボタンの表示 ---
+# セッションステートにデータがある時だけボタンを表示する
+if 'generated_q' in st.session_state:
+    
+    st.write("---")
+    st.write("👇 ここからダウンロードできます（片方押しても消えません！）")
     
     col1, col2 = st.columns(2)
+    
+    suffix = st.session_state['file_name_suffix']
+    
     with col1:
         st.download_button(
             label="📥 問題をダウンロード",
-            data=bio_q.getvalue(),
-            file_name=f"LEAP_テスト{s}～{f}.docx",
+            data=st.session_state['generated_q'],
+            file_name=f"LEAP_テスト{suffix}.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
     with col2:
         st.download_button(
             label="📥 答えをダウンロード",
-            data=bio_a.getvalue(),
-            file_name=f"LEAP_答え{s}～{f}.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
+            data=st.session_state['generated_a'],
+            file_name=f"LEAP_答え{suffix}.docx",
+            m
