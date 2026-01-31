@@ -2699,4 +2699,6 @@ if 'generated_q' in st.session_state:
             label="📥 答えをダウンロード",
             data=st.session_state['generated_a'],
             file_name=f"LEAP_答え{suffix}.docx",
-            m
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+
