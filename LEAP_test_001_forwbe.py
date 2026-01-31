@@ -2645,7 +2645,7 @@ if st.button('テストを作成する！'):
     leap_answer_file = Document()
     
     # ヘッダー作成
-    header_text = f"名前:＿＿＿＿＿＿＿＿＿＿＿＿＿＿\n範囲：No.{s}～{f} からランダムに{actual_q_num}問\n\n答えの〔No.～〕は単語番号です。\n"
+    header_text = f"名前:＿＿＿＿＿＿＿＿＿＿＿＿＿＿範囲：No.{s}～{f} からランダムに{actual_q_num}問\n答えの〔No.～〕は単語番号です。\n"
     leap_file.add_paragraph(header_text)
     leap_answer_file.add_paragraph(header_text)
 
@@ -2701,6 +2701,7 @@ if 'generated_q' in st.session_state:
             file_name=f"LEAP_答え{suffix}.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
+
 
 
 
