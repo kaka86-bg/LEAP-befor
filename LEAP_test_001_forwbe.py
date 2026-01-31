@@ -2655,7 +2655,7 @@ if st.button('テストを作成する！'):
         
         # 問題ファイル
         leap_file.add_paragraph(
-            f"Q{i+1}:　{q_text}\n\n{'＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿'\n\n}"
+            f"Q{i+1}:　{q_text}\n\n{'＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿'}\n\n"
         )
         # 解答ファイル
         leap_answer_file.add_paragraph(
@@ -2701,5 +2701,6 @@ if 'generated_q' in st.session_state:
             file_name=f"LEAP_答え{suffix}.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
+
 
 
