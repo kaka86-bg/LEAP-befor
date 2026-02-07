@@ -2603,7 +2603,8 @@ if password != st.secrets["MY_PASSWORD"]:
 
 
 # --- 2. 画面の設定 ---
-st.title("単語・例文テスト作成アプリ 📝")
+st.title("改訂前のLEAP📝")
+st.write("単語テスト（例文）を作ります。")
 st.write("範囲と問題数を指定してください。PDFで出力します。")
 
 # 入力欄
@@ -2755,6 +2756,7 @@ if 'pdf_q' in st.session_state:
             file_name=f"LEAP_答え{suffix}.pdf",
             mime="application/pdf"
         )
+
 
 
 
